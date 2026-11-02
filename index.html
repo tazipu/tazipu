@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2563eb">
+<title>好记帐 · 手机版</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<h1>录入明细表 <span class="sub" id="fileTip">手机本地自动保存</span></h1>
+
+<div class="stat-bar">
+  <div class="info-item">共 <b id="rowCount">0</b> 条</div>
+  <div class="info-item">合计 <b id="totalMoney">0.00</b> 元</div>
+  <div class="info-item">已选 <b id="checkedCount">0</b> 条</div>
+</div>
+
+<div class="toolbar">
+  <div class="group">
+    <button class="btn-yellow" id="undoBtn">↩ 撤销</button>
+    <button class="btn-yellow" id="redoBtn">↪ 前进</button>
+    <button class="btn-blue" id="addRow">＋ 新增一行</button>
+  </div>
+  <div class="group">
+    <button class="btn-blue" id="selectAll">全选</button>
+    <button class="btn-blue" id="unSelectAll">取消全选</button>
+    <button class="btn-red" id="batchDelete">批量删除选中</button>
+  </div>
+  <div class="spacer"></div>
+  <div class="group">
+    <button class="btn-green" id="exportJsonBackup">💾 导出备份 JSON</button>
+    <button class="btn-blue" onclick="document.getElementById('jsonFileInput').click()">📂 导入备份 JSON</button>
+    <button class="btn-green" id="batchExportCSV">导出选中 CSV</button>
+    <button class="btn-blue" id="exportAllCsv">导出全部 CSV</button>
+    <button class="btn-blue" id="exportXlsx">📊 导出 XLSX</button>
+  </div>
+  <div class="group">
+    <button class="btn-green" onclick="document.getElementById('csvFileInput').click()">导入 CSV</button>
+    <button class="btn-green" id="togglePaste">粘贴导入</button>
+    <button class="btn-orange" id="openTrash">回收站(<span id="trashCount">0</span>)</button>
+    <button class="btn-red" id="clearAll">清空全部</button>
+  </div>
+  <input type="file" id="csvFileInput" accept=".csv" style="display:none">
+  <input type="file" id="jsonFileInput" accept=".json" style="display:none">
+</div>
+
+<div class="import-box" id="pasteBox">
+  <div>粘贴 CSV 文本（逗号分隔，和桌面版格式一致：日期,名称,规格,单价,数量,小计,备注）：</div>
+  <textarea class="paste-area" id="pasteText"></textarea>
+  <div class="actions">
+    <button class="btn-blue" id="importFromPasteAppend">追加导入</button>
+    <button class="btn-red" id="importFromPasteCover">清空后导入</button>
+    <button class="btn-gray" id="togglePasteClose">关闭</button>
+  </div>
+</div>
+
+<!-- ============ 桌面宽表 ============ -->
+<div id="desktopWrap">
+  <table>
+    <thead>
+      <tr>
+        <th><input type="checkbox" id="mainCheckAll"></th>
+        <th>日期</th><th>名称</th><th>规格/型号</th><th>数量</th>
+        <th>单价</th><th>小计</th><th>备注</th><th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+    <tbody>
+      <tr class="total-row">
+        <td class="total-cb"></td>
+        <td colspan="5" class="total-label">合计</td>
+        <td id="footTotal">0.00</td>
+        <td class="total-remark"></td>
+        <td class="total-op"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ============ 手机卡片 ============ -->
+<div id="mobileCards"></div>
+
+<div class="footer-note">
+  好记帐手机版（PWA）：数据自动保存在本机浏览器，离线可用；可导出 JSON 备份与桌面电脑版互相导入；CSV / XLSX 格式与桌面版一致。Copyright©2026·郑州梅高广告·13014641073
+</div>
+
+<!-- ============ 回收站 ============ -->
+<div class="modal-mask" id="trashModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>回收站</h3>
+      <button class="btn-gray" id="closeTrash">关闭</button>
+    </div>
+    <div class="modal-body">
+      <div id="desktopWrapTrash">
+        <table>
+          <thead>
+            <tr><th>日期</th><th>名称</th><th>规格/型号</th><th>数量</th><th>单价</th><th>小计</th><th>备注</th><th>操作</th></tr>
+          </thead>
+          <tbody id="trashBody"></tbody>
+        </table>
+      </div>
+      <div id="trashMobile"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-blue" id="restoreAll">全部恢复</button>
+      <button class="btn-red" id="emptyTrash">彻底清空回收站</button>
+      <button class="btn-gray" id="closeTrash2">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="js/db.js"></script>
+<script src="js/app.js"></script>
+<script>
+  // 表头全选联动
+  document.getElementById('mainCheckAll').addEventListener('change', function () {
+    document.querySelectorAll('.row-check').forEach(c => c.checked = this.checked);
+    updateCheckedCount();
+  });
+</script>
+</body>
+</html>
